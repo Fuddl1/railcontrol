@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
+include(GNUInstallDirs)
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
 	find_package(Git QUIET)
@@ -380,13 +381,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads dl)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
 
 configure_file(Version.cpp.in Version.cpp @ONLY)
+target_compile_definitions(railcontrol PRIVATE HTML_DATA_PATH=\"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/railcontrol/html\")
 
-set(CMAKE_INSTALL_BINDIR ".")
-set(DATADIR ".")
-
-install(TARGETS ${PROJECT_NAME})
-install(FILES railcontrol.conf.dist DESTINATION ${DATADIR})
-install(DIRECTORY html DESTINATION ${DATADIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install(FILES railcontrol.conf.dist TYPE SYSCONF RENAME railcontrol.conf)
+install(DIRECTORY html DESTINATION ${CMAKE_INSTALL_DATADIR}/railcontrol)
 
 include(CPack)
 
