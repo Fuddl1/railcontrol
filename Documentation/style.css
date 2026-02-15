@@ -1045,6 +1045,7 @@ footer {
     background-color: black;
     overflow-y: scroll;
     padding: 1em;
+    border-right: 0.2em solid gray;
 }
 
 a {
