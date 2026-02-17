@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.10)
-include(GNUInstallDirs)
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
 	find_package(Git QUIET)
@@ -47,6 +46,7 @@ endif()
 string(REGEX REPLACE "^v" "" RAILCONTROL_VERSION "${RAILCONTROL_VERSION}")
 
 project(railcontrol VERSION ${RAILCONTROL_VERSION})
+include(GNUInstallDirs)
 
 STRING(TIMESTAMP COMPILE_TIMESTAMP "%s" UTC)
 
