@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -55,15 +55,15 @@ namespace DataModel
 			inline Feedback(Manager* manager,
 				const FeedbackID feedbackID)
 			:	LayoutItem(feedbackID),
-			 	controlID(ControlIdNone),
-			 	pin(FeedbackPinNone),
+				controlID(ControlIdNone),
+				pin(FeedbackPinNone),
 				device(FeedbackDeviceNone),
 				bus(FeedbackBusNone),
-			 	manager(manager),
-			 	feedbackType(FeedbackTypeDefault),
-			 	routeId(RouteNone),
-			 	inverted(false),
-			 	track(nullptr),
+				manager(manager),
+				feedbackType(FeedbackTypeDefault),
+				routeId(RouteNone),
+				inverted(false),
+				track(nullptr),
 				stateCounter(0)
 			{
 			}

@@ -15,12 +15,14 @@ jobs:
   make:
     name: "${{ matrix.os }} with make"
     runs-on: "${{ matrix.os }}"
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         os:
           - ubuntu-latest
           - windows-latest
+          - macos-latest
     steps:
       - uses: actions/checkout@v6
         with:
@@ -30,29 +32,55 @@ jobs:
         if: runner.os == 'Windows'
         with:
           packages: gcc-core gcc-g++
+      - name: Get number of CPU cores
+        uses: SimenB/github-actions-cpu-cores@v2
+        id: cpu-cores
       - name: Build
-        run: make -j$(nproc)
+        run: make -j${{ steps.cpu-cores.outputs.count }}
         shell: bash
         env:
           CC: gcc
           CXX: g++
+      - name: Set up Python for tests
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+      - name: Install test dependencies
+        run: pip install -r requirements.txt
+      - name: Test
+        run: make test
 
   cmake:
     name: "${{ matrix.os }} with cmake"
     runs-on: "${{ matrix.os }}"
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         os:
           - ubuntu-latest
+          - macos-latest
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - name: Get number of CPU cores
+        uses: SimenB/github-actions-cpu-cores@v2
+        id: cpu-cores
       - name: Build
         run: |
           cmake -B build
-          cmake --build build -j$(nproc)
+          cmake --build build -j${{ steps.cpu-cores.outputs.count }}
+      - name: Set up Python for tests
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+      - name: Install test dependencies
+        run: pip install -r requirements.txt
+      - name: Test
+        run: ctest --test-dir build --verbose
 
   # A dummy job that you can mark as a required check instead of each individual test
   test-suite:
