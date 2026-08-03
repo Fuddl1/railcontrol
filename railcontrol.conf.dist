@@ -23,6 +23,11 @@ webserverport = 8082
 # To turn on Z21 Server emulation set this to "true"
 z21server = false
 
-# To turn on CS2 Server emulation set this to "true"
-cs2server = false
+# To turn on CS2 TCP Server emulation set this to "true".
+# This is the resent implementation and should be used if available.
+cs2tcpserver = false
+
+# To turn on CS2 UDP Server emulation set this to "true".
+# This is the old implementation and is usually not used anymore by Maerklin.
+cs2udpserver = false
 
