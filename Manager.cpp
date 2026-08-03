@@ -109,9 +109,12 @@ Manager::Manager(Config& config)
 		serverEnabled = true;
 	}
 
-	if (config.getBoolValue("cs2server", false))
+	const bool cs2server = config.getBoolValue("cs2server", false);
+	const bool cs2tcpserver = config.getBoolValue("cs2tcpserver", cs2server);
+	const bool cs2udpserver = config.getBoolValue("cs2udpserver", cs2server);
+	if (cs2tcpserver || cs2udpserver)
 	{
-		controls[ControlIdCS2Server] = new Server::CS2::CS2Server(*this);
+		controls[ControlIdCS2Server] = new Server::CS2::CS2Server(*this, cs2tcpserver, cs2udpserver);
 		serverEnabled = true;
 	}
 

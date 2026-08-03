@@ -42,13 +42,16 @@ namespace Network
 
 namespace Server { namespace CS2
 {
-	CS2Server::CS2Server(Manager& manager)
+	CS2Server::CS2Server(Manager& manager, const bool enableTcp, const bool enableUdp)
 	:	ControlInterface(ControlTypeCS2Server),
 		Network::TcpServer("0.0.0.0", CS2ReceiverPort, "CS2Server"),
 		logger(Logger::Logger::GetLogger("CS2Server")),
 		manager(manager),
+		enableTcp(enableTcp),
+		enableUdp(enableUdp),
 		lastClientID(0),
-		runUdp(false)
+		runUdp(false),
+		udpServerSocket(-1)
 	{
 	}
 
@@ -60,15 +63,27 @@ namespace Server { namespace CS2
 
 	void CS2Server::Start()
 	{
-		StartTcpServer();
-		StartUdpServer();
+		if (enableTcp)
+		{
+			StartTcpServer();
+		}
+		if (enableUdp)
+		{
+			StartUdpServer();
+		}
 		logger->Info(Languages::TextCS2ServerStarted);
 	}
 
 	void CS2Server::Stop()
 	{
-		TerminateUdpServer();
-		TerminateTcpServer();
+		if (enableUdp)
+		{
+			TerminateUdpServer();
+		}
+		if (enableTcp)
+		{
+			TerminateTcpServer();
+		}
 		// stopping all clients
 		for (auto client : clients)
 		{
@@ -92,7 +107,10 @@ namespace Server { namespace CS2
 	void CS2Server::TerminateUdpServer()
 	{
 		runUdp = false;
-		udpServerThread.join();
+		if (udpServerThread.joinable())
+		{
+			udpServerThread.join();
+		}
 	}
 
 	void CS2Server::UdpSocketCreateBindListen(int family, struct sockaddr* address)

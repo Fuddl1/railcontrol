@@ -47,7 +47,7 @@ namespace Server { namespace CS2
 			CS2Server(const CS2Server&) = delete;
 			CS2Server& operator=(const CS2Server&) = delete;
 
-			CS2Server(Manager& manager);
+			CS2Server(Manager& manager, const bool enableTcp, const bool enableUdp);
 			~CS2Server();
 
 			void Start() override;
@@ -104,6 +104,8 @@ namespace Server { namespace CS2
 		private:
 			Logger::Logger* logger;
 			Manager& manager;
+			const bool enableTcp;
+			const bool enableUdp;
 			std::vector<CS2Client*> clients;
 			unsigned int lastClientID;
 
