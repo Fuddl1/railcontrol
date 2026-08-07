@@ -100,7 +100,8 @@ namespace Network
 
 	void Serial::Close()
 	 {
-		if (!IsConnected())
+		std::lock_guard<std::mutex> Guard(fileHandleMutex);
+		if (fileHandle == -1)
 		{
 			return;
 		}
@@ -124,23 +125,33 @@ namespace Network
 
 	ssize_t Serial::Receive(unsigned char* data, const size_t maxData, const unsigned int timeoutS, const unsigned int timeoutUS)
 	{
-		if (!IsConnected())
+		int receiveFileHandle;
+		{
+			std::lock_guard<std::mutex> Guard(fileHandleMutex);
+			if (fileHandle == -1)
+			{
+				return -1;
+			}
+			receiveFileHandle = fileHandle;
+		}
+
+		if (receiveFileHandle >= FD_SETSIZE)
 		{
 			return -1;
 		}
 		fd_set set;
 		FD_ZERO(&set);
-		FD_SET(fileHandle, &set);
+		FD_SET(receiveFileHandle, &set);
 		struct timeval tvTimeout;
 		tvTimeout.tv_sec = timeoutS;
 		tvTimeout.tv_usec = timeoutUS;
 
-		ssize_t ret = TEMP_FAILURE_RETRY(select(FD_SETSIZE, &set, NULL, NULL, &tvTimeout));
+		ssize_t ret = TEMP_FAILURE_RETRY(select(receiveFileHandle + 1, &set, NULL, NULL, &tvTimeout));
 		if (ret <= 0)
 		{
 			return -1;
 		}
-		ret = read(fileHandle, data, maxData);
+		ret = read(receiveFileHandle, data, maxData);
 		if (ret <= 0) // FIXME: why not (ret < 0)?
 		{
 			return -1;
