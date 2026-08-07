@@ -93,6 +93,7 @@ namespace Hardware { namespace Protocols
 			}
 
 			void Init();
+			void Stop();
 
 			virtual ~MaerklinCANCommon();
 

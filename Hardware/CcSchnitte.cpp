@@ -41,6 +41,11 @@ namespace Hardware
 		Init();
 	}
 
+	CcSchnitte::~CcSchnitte()
+	{
+		Stop();
+	}
+
 	void CcSchnitte::Send(const unsigned char* buffer)
 	{
 		if (!serialLine.IsConnected())

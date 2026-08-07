@@ -68,11 +68,17 @@ namespace Network
 
 			inline bool IsConnected() const
 			{
+				std::lock_guard<std::mutex> Guard(fileHandleMutex);
 				return fileHandle != -1;
 			}
 
 			inline void ClearBuffers()
 			{
+				std::lock_guard<std::mutex> Guard(fileHandleMutex);
+				if (fileHandle == -1)
+				{
+					return;
+				}
 				tcflush(fileHandle, TCIOFLUSH);
 			}
 
@@ -88,11 +94,11 @@ namespace Network
 
 			inline ssize_t Send(const unsigned char* data, const size_t size)
 			{
-				if (!IsConnected())
+				std::lock_guard<std::mutex> Guard(fileHandleMutex);
+				if (fileHandle == -1)
 				{
 					return 0;
 				}
-				std::lock_guard<std::mutex> Guard(fileHandleMutex);
 				return write(fileHandle, data, size);
 			}
 

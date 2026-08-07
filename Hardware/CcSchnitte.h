@@ -35,6 +35,7 @@ namespace Hardware
 			CcSchnitte& operator=(const CcSchnitte&) = delete;
 
 			CcSchnitte(const HardwareParams* params);
+			~CcSchnitte();
 
 			static void GetArgumentTypesAndHint(std::map<unsigned char,ArgumentType>& argumentTypes, std::string& hint)
 			{

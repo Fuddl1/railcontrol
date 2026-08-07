@@ -39,13 +39,24 @@ namespace Hardware { namespace Protocols
 
 	MaerklinCANCommon::~MaerklinCANCommon()
 	{
-		run = false;
-		receiverThread.join();
-		pingThread.join();
+		Stop();
 		while (canFiles.size())
 		{
 			vector<struct CanFile>::iterator firstCanFile = canFiles.begin();
 			DeleteCanFile(&(*firstCanFile));
+		}
+	}
+
+	void MaerklinCANCommon::Stop()
+	{
+		run = false;
+		if (receiverThread.joinable())
+		{
+			receiverThread.join();
+		}
+		if (pingThread.joinable())
+		{
+			pingThread.join();
 		}
 	}
 
