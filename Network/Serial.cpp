@@ -18,6 +18,7 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
+#include <cerrno>
 #include <fcntl.h>
 #include <termios.h>
 
@@ -28,7 +29,7 @@ namespace Network
 {
 	void Serial::Init()
 	{
-		fileHandle = open(tty.c_str(), O_RDWR | O_NOCTTY);
+		fileHandle = open(tty.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
 		if (!IsConnected())
 		{
 			logger->Error(Languages::TextUnableToOpenSerial, tty);
@@ -94,7 +95,6 @@ namespace Network
 		options.c_cflag |= CLOCAL;  // ignore control lines
 		options.c_cflag |= CREAD;   // enable receiver
 		tcsetattr(fileHandle, TCSANOW, &options); // store options
-
 		ClearBuffers();
 	}
 
@@ -108,6 +108,62 @@ namespace Network
 		close(fileHandle);
 		fileHandle = -1;
 	 }
+
+	ssize_t Serial::Send(const unsigned char* data, const size_t size)
+	{
+		int sendFileHandle;
+		{
+			std::lock_guard<std::mutex> Guard(fileHandleMutex);
+			if (fileHandle == -1)
+			{
+				errno = ENOTCONN;
+				return -1;
+			}
+			sendFileHandle = fileHandle;
+		}
+
+		if (sendFileHandle >= FD_SETSIZE)
+		{
+			errno = EINVAL;
+			return -1;
+		}
+
+		size_t written = 0;
+		while (written < size)
+		{
+			fd_set set;
+			FD_ZERO(&set);
+			FD_SET(sendFileHandle, &set);
+			struct timeval tvTimeout;
+			tvTimeout.tv_sec = 0;
+			tvTimeout.tv_usec = 100000;
+
+			ssize_t ret = TEMP_FAILURE_RETRY(select(sendFileHandle + 1, NULL, &set, NULL, &tvTimeout));
+			if (ret < 0)
+			{
+				return -1;
+			}
+			if (ret == 0)
+			{
+				errno = ETIMEDOUT;
+				return -1;
+			}
+
+			ret = write(sendFileHandle, data + written, size - written);
+			if (ret < 0)
+			{
+				return -1;
+			}
+			if (ret == 0)
+			{
+				errno = EIO;
+				return -1;
+			}
+			written += ret;
+		}
+
+		return written;
+	}
 
 	bool Serial::Receive(std::string& data, const size_t maxData, const unsigned int timeoutS, const unsigned int timeoutUS)
 	{
@@ -149,6 +205,10 @@ namespace Network
 		ssize_t ret = TEMP_FAILURE_RETRY(select(receiveFileHandle + 1, &set, NULL, NULL, &tvTimeout));
 		if (ret <= 0)
 		{
+			if (ret == 0)
+			{
+				errno = ETIMEDOUT;
+			}
 			return -1;
 		}
 		ret = read(receiveFileHandle, data, maxData);
