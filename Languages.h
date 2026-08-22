@@ -484,6 +484,7 @@ class Languages
 			TextLogLevel,
 			TextLongestUnused,
 			TextLookingForDestination,
+			TextMaerklinCANFrameReceived,
 			TextMaerklinLeft,
 			TextMaerklinMotorola,
 			TextMaerklinRight,

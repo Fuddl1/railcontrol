@@ -460,6 +460,18 @@ namespace Hardware { namespace Protocols
 		{
 			switch (command)
 			{
+				case CanCommandDiscovery:
+					ParseDiscovery(buffer);
+					return;
+
+				case CanCommandMfxBind:
+					ParseMfxBind(buffer);
+					return;
+
+				case CanCommandMfxVerify:
+					ParseMfxVerify(buffer);
+					return;
+
 				case CanCommandS88Event:
 					ParseResponseS88Event(buffer);
 					return;
@@ -499,6 +511,18 @@ namespace Hardware { namespace Protocols
 				ParseCommandSystem(buffer);
 				return;
 
+			case CanCommandDiscovery:
+				ParseDiscovery(buffer);
+				return;
+
+			case CanCommandMfxBind:
+				ParseMfxBind(buffer);
+				return;
+
+			case CanCommandMfxVerify:
+				ParseMfxVerify(buffer);
+				return;
+
 			case CanCommandRequestConfigData:
 				ParseCommandRequestConfigData(buffer);
 				return;
@@ -514,6 +538,171 @@ namespace Hardware { namespace Protocols
 			default:
 				return;
 		}
+	}
+
+	static string MaerklinCANResponseString(const unsigned char response)
+	{
+		return response ? "response" : "command";
+	}
+
+	static string MaerklinCANHeaderDetails(const unsigned char* const buffer)
+	{
+		return "type=" + MaerklinCANResponseString(buffer[1] & 0x01)
+			+ ", hash=0x" + Utils::Integer::IntegerToHex(Utils::Integer::DataBigEndianToShort(buffer + 2), 4)
+			+ ", dlc=" + std::to_string(buffer[4]);
+	}
+
+	static string MaerklinCANDiscoveryProtocol(const uint8_t protocol)
+	{
+		if (protocol <= 32)
+		{
+			return "mfx programming track range=" + std::to_string(protocol);
+		}
+		if (protocol >= 64 && protocol <= 96)
+		{
+			return "mfx main track range=" + std::to_string(protocol - 64) + " (raw=" + std::to_string(protocol) + ")";
+		}
+
+		switch (protocol)
+		{
+			case 33:
+				return "MM2 programming track discovery 20 kHz";
+
+			case 34:
+				return "MM2 programming track discovery 40 kHz";
+
+			case 35:
+				return "DCC programming track short address read";
+
+			case 36:
+				return "DCC programming track long address read";
+
+			case 37:
+				return "DCC programming track discovery";
+
+			case 38:
+				return "SX1 programming track address read";
+
+			case 39:
+				return "SX1 programming track discovery";
+
+			case 98:
+				return "MM2 main track invalid";
+
+			case 99:
+				return "DCC main track invalid short address read";
+
+			case 100:
+				return "DCC main track invalid long address read";
+
+			case 101:
+				return "SX1 main track invalid address read";
+
+			case 102:
+				return "SX1 main track invalid discovery";
+		}
+		return "unknown protocol/range=" + std::to_string(protocol);
+	}
+
+	static bool MaerklinCANDiscoveryIsMfx(const uint8_t protocol)
+	{
+		return protocol <= 32 || (protocol >= 64 && protocol <= 96);
+	}
+
+	void MaerklinCANCommon::ParseDiscovery(const unsigned char* const buffer)
+	{
+		const CanLength length = ParseLength(buffer);
+		string details = MaerklinCANHeaderDetails(buffer);
+
+		switch (length)
+		{
+			case 0:
+				details += ", form=1, discovery=all protocols";
+				break;
+
+			case 1:
+				details += ", form=2, " + MaerklinCANDiscoveryProtocol(buffer[5]);
+				break;
+
+			case 5:
+			case 6:
+			{
+				const uint8_t protocol = buffer[9];
+				const uint32_t id = Utils::Integer::DataBigEndianToInt(buffer + 5);
+				details += ", form=3, " + MaerklinCANDiscoveryProtocol(protocol);
+				if (MaerklinCANDiscoveryIsMfx(protocol))
+				{
+					details += ", mfxUid=0x" + Utils::Integer::IntegerToHex(id, 8);
+				}
+				else
+				{
+					Address address;
+					Protocol parsedProtocol;
+					LocoType type;
+					ParseAddressProtocol(id, address, parsedProtocol, type);
+					details += ", locId=0x" + Utils::Integer::IntegerToHex(id, 8)
+						+ ", protocol=" + Utils::Utils::ProtocolToString(parsedProtocol)
+						+ ", address=" + std::to_string(address);
+				}
+				if (length == 6)
+				{
+					details += ", ask=0x" + Utils::Integer::IntegerToHex(buffer[10], 2)
+						+ " (" + std::to_string(buffer[10]) + ")";
+				}
+				break;
+			}
+
+			default:
+				details += ", unsupported discovery length";
+				break;
+		}
+		logger->Info(Languages::TextMaerklinCANFrameReceived, "Discovery", details);
+	}
+
+	void MaerklinCANCommon::ParseMfxBind(const unsigned char* const buffer)
+	{
+		string details = MaerklinCANHeaderDetails(buffer);
+		if (ParseLength(buffer) == 6)
+		{
+			const uint32_t uid = Utils::Integer::DataBigEndianToInt(buffer + 5);
+			const uint16_t sid = Utils::Integer::DataBigEndianToShort(buffer + 9);
+			details += ", mfxUid=0x" + Utils::Integer::IntegerToHex(uid, 8)
+				+ ", mfxSid=0x" + Utils::Integer::IntegerToHex(sid, 4)
+				+ " (" + std::to_string(sid) + ")";
+		}
+		else
+		{
+			details += ", unsupported bind length";
+		}
+		logger->Info(Languages::TextMaerklinCANFrameReceived, "MFX Bind", details);
+	}
+
+	void MaerklinCANCommon::ParseMfxVerify(const unsigned char* const buffer)
+	{
+		const CanLength length = ParseLength(buffer);
+		string details = MaerklinCANHeaderDetails(buffer);
+		if (length == 6 || length == 7)
+		{
+			const uint32_t uid = Utils::Integer::DataBigEndianToInt(buffer + 5);
+			const uint16_t sid = Utils::Integer::DataBigEndianToShort(buffer + 9);
+			details += ", mfxUid=0x" + Utils::Integer::IntegerToHex(uid, 8)
+				+ ", mfxSid=0x" + Utils::Integer::IntegerToHex(sid, 4)
+				+ " (" + std::to_string(sid) + ")";
+			if (ParseResponse(buffer) == CanResponseResponse)
+			{
+				details += sid == 0 ? ", result=negative" : ", result=positive";
+			}
+			if (length == 7)
+			{
+				details += ", ask=0x" + Utils::Integer::IntegerToHex(buffer[11], 2)
+					+ " (" + std::to_string(buffer[11]) + ")";
+			}
+		}
+		else
+		{
+			details += ", unsupported verify length";
+		}
+		logger->Info(Languages::TextMaerklinCANFrameReceived, "MFX Verify", details);
 	}
 
 	void MaerklinCANCommon::ParseCommandSystem(const unsigned char* const buffer)
