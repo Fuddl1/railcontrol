@@ -127,6 +127,9 @@ namespace Hardware { namespace Protocols
 			enum CanCommand : unsigned char
 			{
 				CanCommandSystem            = 0x00,
+				CanCommandDiscovery         = 0x01,
+				CanCommandMfxBind           = 0x02,
+				CanCommandMfxVerify         = 0x03,
 				CanCommandLocoSpeed         = 0x04,
 				CanCommandLocoDirection     = 0x05,
 				CanCommandLocoFunction      = 0x06,
@@ -368,6 +371,9 @@ namespace Hardware { namespace Protocols
 			}
 
 			void ParseCommandSystem(const unsigned char* const buffer);
+			void ParseDiscovery(const unsigned char* const buffer);
+			void ParseMfxBind(const unsigned char* const buffer);
+			void ParseMfxVerify(const unsigned char* const buffer);
 			void ParseResponseLocoSpeed(const unsigned char* const buffer);
 			void ParseResponseLocoDirection(const unsigned char* const buffer);
 			void ParseResponseLocoFunction(const unsigned char* const buffer);

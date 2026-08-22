@@ -484,6 +484,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextLogLevel */ { "Log level", "Log Level", "Nivel de registro" },
 /* TextLongestUnused */ { "Longest unused", "Am längsten ungenutzt", "El más largo sin usar" },
 /* TextLookingForDestination */ {"Looking for new destination starting from {0}", "Suche von {0} aus neues Ziel", "Buscando nuevo destino deste {0}" },
+/* TextMaerklinCANFrameReceived */ { "Received Märklin CAN {0}: {1}", "Märklin CAN {0} empfangen: {1}", "Märklin CAN {0} recibido: {1}" },
 /* TextMaerklinLeft */ { "Märklin DSS left", "Märklin DKW links", "Märklin DCD izquierda" },
 /* TextMaerklinMotorola */ { "Märklin Motorola", "Märklin Motorola", "Märklin Motorola" },
 /* TextMaerklinRight */ { "Märklin DSS right", "Märklin DKW rechts", "Märklin DCD derecha" },
