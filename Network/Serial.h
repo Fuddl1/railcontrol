@@ -92,15 +92,7 @@ namespace Network
 				return Send(&data, 1);
 			}
 
-			inline ssize_t Send(const unsigned char* data, const size_t size)
-			{
-				std::lock_guard<std::mutex> Guard(fileHandleMutex);
-				if (fileHandle == -1)
-				{
-					return 0;
-				}
-				return write(fileHandle, data, size);
-			}
+			ssize_t Send(const unsigned char* data, const size_t size);
 
 			bool Receive(std::string& data, const size_t maxData = 1024, const unsigned int timeoutS = 0, const unsigned int timeoutUS = 100000);
 			ssize_t Receive(unsigned char* data, const size_t maxData, const unsigned int timeoutS = 0, const unsigned int timeoutUS = 100000);
