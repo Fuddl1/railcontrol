@@ -350,6 +350,7 @@ namespace Server { namespace Web
 		const bool reserved = locoConfig.GetType() != LocoTypeNone;
 		const string& trackName = track->GetMainName();
 		const string& locoName = locoConfig.GetName();
+		const string toolTip = trackName + (locoConfig.IsValid() ? " (" + locoName + " " + ProtocolSymbols[locoConfig.GetProtocol()] + "/" + to_string(locoConfig.GetAddress()) + ")" : "");
 		const bool occupied = track->GetMainStateDelayed() == DataModel::Feedback::FeedbackStateOccupied;
 		const bool blocked = track->GetMainBlocked();
 		const Orientation orientation = track->GetMainLocoOrientation();
@@ -363,7 +364,8 @@ namespace Server { namespace Web
 			+ ";reserved=" + reservedText
 			+ ";blocked=" + blockedText
 			+ ";orientation=" + orientationText
-			+ ";loconame=" + locoName);
+			+ ";loconame=" + locoName
+			+ ";tooltip=" + toolTip);
 
 		if (track->GetMain())
 		{

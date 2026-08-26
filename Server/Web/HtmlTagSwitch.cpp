@@ -113,7 +113,7 @@ namespace Server { namespace Web
 		imageDiv.AddClass(stateClass);
 		onClickMenuDiv.AddClass(stateClass);
 
-		AddToolTip(switchName + " (addr=" + to_string(mySwitch->GetAddress()) + ")");
+		AddToolTip(switchName + " (" + ProtocolSymbols[mySwitch->GetProtocol()] + "/" + to_string(mySwitch->GetAddress()) + ")");
 		AddContextMenuEntry(switchName);
 		AddContextMenuEntry(Languages::TextReleaseSwitch, "fireRequestAndForget('/?cmd=switchrelease&switch=" + idText + "');");
 		AddContextMenuEntry(Languages::TextEditSwitch, "loadPopup('/?cmd=switchedit&switch=" + idText + "');");

@@ -124,7 +124,7 @@ namespace Server { namespace Web
 		}
 
 		const string& accessoryName = accessory->GetName();
-		AddToolTip(accessoryName + " (addr=" + to_string(accessory->GetAddress()) + ")");
+		AddToolTip(accessoryName + " (" + ProtocolSymbols[accessory->GetProtocol()] + "/" + to_string(accessory->GetAddress()) + ")");
 		AddContextMenuEntry(accessoryName);
 		AddContextMenuEntry(Languages::TextReleaseAccessory, "fireRequestAndForget('/?cmd=accessoryrelease&accessory=" + accessoryIdString + "');");
 		AddContextMenuEntry(Languages::TextEditAccessory, "loadPopup('/?cmd=accessoryedit&accessory=" + accessoryIdString + "');");
