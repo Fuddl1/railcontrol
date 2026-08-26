@@ -301,6 +301,11 @@ namespace DataModel
 				return orientation;
 			}
 
+			inline bool IsValid() const
+			{
+				return (locoID != LocoNone) && (type != LocoTypeNone);
+			}
+
 		private:
 			const LocoType type;
 			const ControlID controlID;

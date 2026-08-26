@@ -18,6 +18,7 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
+#include "DataModel/LocoConfig.h"
 #include "DataModel/ObjectIdentifier.h"
 #include "DataModel/Route.h"
 #include "DataModel/Track.h"
@@ -76,6 +77,8 @@ namespace Server { namespace Web
 		imageDiv.AddClass(trackClass);
 		const DataModel::LayoutItem::LayoutItemSize trackHeight = layout->GetHeight();
 		const string layoutHeight = to_string(EdgeLength * trackHeight);
+		const DataModel::LocoConfig locoConfig = manager.GetLocoBase(locoBaseIdentifier);
+		const string& locoName = locoConfig.IsValid() ? locoConfig.GetName() : "";
 
 		switch (track->GetTrackType())
 		{
@@ -137,13 +140,12 @@ namespace Server { namespace Web
 				const string textPositionX = to_string(EdgeLength * trackHeight - 1);
 				if (!track->GetMain())
 				{
-					string locoName;
 					if (reserved)
 					{
 						const string& orientationSign = track->GetMainLocoOrientation() == OrientationRight ? "&rarr; " : "&larr; ";
-						locoName = orientationSign + manager.GetLocoBaseName(locoBaseIdentifier);
+						const string locoOrientationName = orientationSign + locoName;
+						image += "<text class=\"loconame\" x=\"-" + textPositionX + "\" y=\"11\" id=\"" + identifier + "_text_loconame\" transform=\"rotate(270 0,0)\">" + locoName + "</text>";
 					}
-					image += "<text class=\"loconame\" x=\"-" + textPositionX + "\" y=\"11\" id=\"" + identifier + "_text_loconame\" transform=\"rotate(270 0,0)\">" + locoName + "</text>";
 				}
 				if (track->GetShowName())
 				{
@@ -176,7 +178,8 @@ namespace Server { namespace Web
 		AddContextMenuEntry(Languages::TextReleaseTrackAndLoco, "fireRequestAndForget('/?cmd=locorelease&" + urlMainIdentifier + "');", "track_loco_release");
 		AddContextMenuEntry(Languages::TextEditTrack, "loadPopup('/?cmd=trackedit&" + urlIdentifier + "');");
 		AddContextMenuEntry(Languages::TextDeleteTrack, "loadPopup('/?cmd=trackaskdelete&" + urlIdentifier + "');");
-		AddToolTip(trackName);
+		const string tooltip = trackName + (locoConfig.IsValid() ? " (" + locoName + " " + ProtocolSymbols[locoConfig.GetProtocol()] + "/" + to_string(locoConfig.GetAddress()) + ")" : "");
+		AddToolTip(tooltip);
 		FinishInit();
 	}
 

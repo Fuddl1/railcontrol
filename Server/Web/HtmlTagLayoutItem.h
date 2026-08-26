@@ -80,7 +80,7 @@ namespace Server { namespace Web
 
 			void AddToolTip(const std::string& toolTip)
 			{
-				imageDiv.AddChildTag(HtmlTag("span").AddClass("tooltip").AddContent(toolTip));
+				imageDiv.AddChildTag(HtmlTag("span").AddClass("tooltip").AddContent(toolTip).AddId(identifier + "_tooltip"));
 			}
 
 			static const unsigned char EdgeLength = 36;

@@ -1408,12 +1408,24 @@ function updateTrackState(argumentMap)
 		}
 	}
 
-	var locoElement = document.getElementById(elementName + '_text_loconame');
-	if (locoElement)
+	if (argumentMap.has('loconame'))
 	{
-		var orientationArrow = orientation ? '&rarr; ' : '&larr; ';
-		var locoName = argumentMap.has('loconame') ? argumentMap.get('loconame') : '';
-		locoElement.innerHTML = orientationArrow + locoName;
+		let locoElement = document.getElementById(elementName + '_text_loconame');
+		if (locoElement)
+		{
+			let orientationArrow = orientation ? '&rarr; ' : '&larr; ';
+			let locoName = argumentMap.get('loconame');
+			locoElement.innerHTML = orientationArrow + locoName;
+		}
+	}
+
+	if (argumentMap.has('tooltip'))
+	{
+		let toolTip = document.getElementById(elementName + '_tooltip');
+		if (toolTip)
+		{
+			toolTip.innerHTML = argumentMap.get('tooltip');
+		}
 	}
 }
 

@@ -122,7 +122,7 @@ namespace Server { namespace Web
 			default:
 				break;
 		}
-		AddToolTip(signal->GetName() + " (addr=" + to_string(signal->GetAddress()) + ")");
+		AddToolTip(signal->GetName() + " (" + ProtocolSymbols[signal->GetProtocol()] + "/" + to_string(signal->GetAddress()) + ")");
 
 		AddContextMenuEntry(Languages::TextEditSignal, "loadPopup('/?cmd=signaledit&signal=" + idText + "');");
 		AddContextMenuEntry(Languages::TextDeleteSignal, "loadPopup('/?cmd=signalaskdelete&signal=" + idText + "');");
