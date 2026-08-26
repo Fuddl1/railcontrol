@@ -1056,3 +1056,27 @@ a:hover {
   color: lightgrey;
 }
 
+th,
+td {
+  vertical-align: middle;
+}
+
+col:first-child {
+  width: 1px !important;
+}
+
+col:nth-child(2) {
+  width: auto !important;
+}
+
+th:first-child,
+td:first-child {
+  width: 1px;
+  white-space: nowrap;
+}
+
+th:first-child img,
+td:first-child img {
+  display: block;
+}
+
