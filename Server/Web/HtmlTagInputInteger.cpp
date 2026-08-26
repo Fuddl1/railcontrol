@@ -33,12 +33,13 @@ namespace Server { namespace Web
 		AddClass("div_integer");
 
 		HtmlTag input("input");
+		input.AddId(name);
+		input.AddAttribute("name", name);
 		input.AddAttribute("type", "number");
 		input.AddAttribute("min", minString);
 		input.AddAttribute("max", maxString);
 		input.AddAttribute("step", "1");
 		input.AddAttribute("value", std::to_string(value));
-		input.AddId(name);
 		input.AddClass("integer");
 		input.AddAttribute("onfocus", "this.select();");
 		input.AddAttribute("onclick", "this.select();");
